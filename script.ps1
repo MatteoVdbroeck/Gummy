@@ -1,39 +1,29 @@
-# Maak een onzichtbaar venster
-$Win32Hide = '[DllImport("user32.dll")] public static extern bool ShowWindow(int handle, int state);'
-Add-Type -Name Win32Utils -Namespace Win32Functions -MemberDefinition $Win32Hide
-$Win32Functions::ShowWindow((Get-Process -Id $PID).MainWindowHandle, 0)
-
 # Zet het volume op maximum
-Add-Type -TypeDefinition @"
-using System;
-using System.Runtime.InteropServices;
-
-public class Audio {
-    [DllImport("user32.dll")]
-    public static extern void keybd_event(byte bVk, byte bScan, int dwFlags, int dwExtraInfo);
-
-    public static void VolumeUp() {
-        for (int i = 0; i < 50; i++) {
-            keybd_event(0xAF, 0, 1, 0); // 0xAF is de Volume Up toets
-            System.Threading.Thread.Sleep(50);
-        }
-    }
+$shell = New-Object -ComObject WScript.Shell
+for ($i=1; $i -le 50; $i++) {
+    $shell.SendKeys([char]175)  # Volume omhoog
+    Start-Sleep -Milliseconds 50
 }
-"@ -Language CSharp
 
-[Audio]::VolumeUp()
-
-# Oneindige loop voor de prank
-while ($true) {
-    Start-Sleep -Seconds 10  # Wacht 10 minuten
-
-    # Open Microsoft Edge en speel YouTube-link af
-    Start-Process 'msedge' -ArgumentList 'https://youtu.be/astISOttCQ0?si=q88g6EFfcYVpakwJ&t=45'
-
-    Start-Sleep -Seconds 6  # Wacht 6 seconden
-
-    # Sluit Edge
+# Functie om Microsoft Edge te openen en video af te spelen
+function Play-YouTube {
+    Write-Host "[INFO] Opening Microsoft Edge..."
+    Start-Process 'msedge' -ArgumentList 'https://youtu.be/astISOttCQ0?si=TX334-dMI0UU1nPm'
+    Start-Sleep -Seconds 6  # Wacht 6 seconden zodat de video begint
+    Write-Host "[INFO] Closing Microsoft Edge..."
     Stop-Process -Name 'msedge' -ErrorAction SilentlyContinue
+}
 
-    Start-Sleep -Seconds 10  # Wacht 4 minuten
+# Eerste uitvoering
+Write-Host "[INFO] Volume set to maximum."
+Write-Host "[INFO] Waiting 10 minutes before starting prank..."
+Start-Sleep -Seconds 10  # Wacht 10 minuten
+Play-YouTube
+
+# Oneindige prank loop
+while ($true) {
+    Write-Host "[INFO] Waiting 4 minutes before repeating..."
+    Start-Sleep -Seconds 1
+    0  # Wacht 4 minuten
+    Play-YouTube
 }
